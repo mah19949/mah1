@@ -1,0 +1,37 @@
+resources:
+- name: repo
+  type: git
+  source:
+    uri: https://github.com/mah19949/mah1.git
+    branch: main
+    username: anwarhussainm.19949@gmail.com # interpolated to <user>
+    password: mah19949@123
+
+jobs:
+- name: myjob
+  plan:
+  - get: repo
+
+  - task: simpletask
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: ubuntu
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            cp -r repo changed-repo
+            touch a_file
+            cat a_file > changed-repo/another_file
+            git add .
+            git commit -m "message"
+
+      inputs:
+      - name: repo
+
+  - put: repo
+    params: { repository: changed-repo }
